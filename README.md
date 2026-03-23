@@ -2,12 +2,22 @@
 
 # followbuildersplus
 
-An enhanced builders digest skill built on top of Zara's original
-`follow-builders`.
+`followbuildersplus` is a builders digest skill redesigned around a more useful
+reading workflow for Chinese users.
 
-It keeps the original idea intact: follow researchers, founders, PMs, and
-engineers who are actually building in AI, not people who just echo the
-timeline.
+Its core goal is not just to send you a list of links. It tries to turn the
+daily stream of AI builder updates into something you can scan inside chat,
+then expand item by item when something is actually worth your attention.
+
+For many users, especially in chat-first workflows, "here are some links, go
+open them yourself" is not a great product experience:
+
+- the reading flow gets fragmented across platforms
+- external links are inconvenient to open repeatedly
+- most of the time, you only want the full detail for one or two items
+
+So this project is designed around a different default: summarize first, then
+let the user ask for detail without leaving the conversation.
 
 What `followbuildersplus` adds is a more operational workflow:
 
@@ -18,18 +28,15 @@ What `followbuildersplus` adds is a more operational workflow:
 
 ## Why This Fork Exists
 
-The original version is excellent for receiving a curated digest.
+This project treats the digest as a readable inbox. You scan numbered items
+first, then ask for detail only when a specific item is worth digging into.
 
-This fork is for a slightly different use case: treating the digest as a
-readable inbox. You scan numbered items first, then ask for detail only when a
-specific item is worth digging into.
-
-That makes it more useful for:
+We built it to solve a few practical problems:
 
 - Daily signal monitoring
 - Historical lookup by item ID
 - Auditing what the model saw before summarization
-- Moving from "summary only" to "summary plus retrieval"
+- Reading detail directly in Feishu or chat instead of constantly opening links
 
 ## Core Capabilities
 
@@ -42,6 +49,20 @@ few practical layers on top:
 - Assigns a stable ID to every digest item
 - Stores daily raw and digest archives locally
 - Lets you request details later using the full item ID
+
+## Why It Is Designed This Way
+
+Many AI information products solve the discovery problem, but not the reading
+problem.
+
+In real use, the higher-frequency workflow is usually:
+
+- skim what is worth paying attention to today
+- choose one item that matters
+- expand it immediately in the same chat window
+
+That is why `followbuildersplus` does not treat the digest as the endpoint.
+The digest is the entry point.
 
 ## What Makes It Different
 
@@ -59,9 +80,33 @@ Compared with the original `follow-builders`, this version adds:
    If your delivery channel supports follow-up chat, you can send a full ID such
    as `FB20260323007` and fetch the stored detail for that item.
 
+   This matters because it keeps summary and detail in the same conversation,
+   instead of pushing the user out to X, YouTube, or another external page for
+   every follow-up read.
+
 4. Structured digest layout
    Digest output is formatted more consistently, which makes it easier to scan
    in Feishu and similar chat tools.
+
+## Project Direction
+
+The current version focuses on getting the core loop right:
+
+- collect builder updates reliably
+- generate a structured digest
+- support detail lookup by ID
+- preserve local archives for traceability
+
+Over time, the source set can expand further:
+
+- broader information sources
+- more Chinese-language source material
+- better detail retrieval and follow-up interaction
+
+But for now, the priority is simple:
+
+make it possible to complete the whole loop of "scan summary -> request detail
+-> read more" inside chat.
 
 ## How It Works
 
@@ -181,12 +226,6 @@ No direct X or YouTube API key is required for normal digest consumption.
 - The skill works on centrally prepared public content feeds
 - Your local configuration and archives stay on your own machine
 - Delivery credentials, if used, should remain in your local environment only
-
-## Acknowledgement
-
-This project is based on Zara Zhang's original
-[`follow-builders`](https://github.com/zarazhangrui/follow-builders) and extends
-it with local archiving, stable IDs, and follow-up retrieval workflows.
 
 ## License
 
