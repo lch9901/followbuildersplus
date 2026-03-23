@@ -1,124 +1,193 @@
 **English** | [中文](README.zh-CN.md)
 
-# Follow Builders, Not Influencers
+# followbuildersplus
 
-An AI-powered digest that tracks the top builders in AI — researchers, founders, PMs,
-and engineers who are actually building things — and delivers curated summaries of
-what they're saying.
+An enhanced builders digest skill built on top of Zara's original
+`follow-builders`.
 
-**Philosophy:** Follow people who build products and have original opinions, not
-influencers who regurgitate information.
+It keeps the original idea intact: follow researchers, founders, PMs, and
+engineers who are actually building in AI, not people who just echo the
+timeline.
 
-## What You Get
+What `followbuildersplus` adds is a more operational workflow:
 
-A daily or weekly digest delivered to your preferred messaging app (Telegram, Discord,
-WhatsApp, etc.) with:
+- Stable item IDs like `FB20260323001`
+- Daily local archives for both raw feed data and digest-ready items
+- Follow-up lookup by full ID inside chat tools such as Feishu
+- A more structured digest format for repeated reading and triage
 
-- Summaries of new podcast episodes from top AI podcasts
-- Key posts and insights from 25 curated AI builders on X/Twitter
-- Links to all original content
-- Available in English, Chinese, or bilingual
+## Why This Fork Exists
 
-## Quick Start
+The original version is excellent for receiving a curated digest.
 
-1. Install the skill in your agent (OpenClaw or Claude Code)
-2. Say "set up follow builders" or invoke `/follow-builders`
-3. The agent walks you through setup conversationally — no config files to edit
+This fork is for a slightly different use case: treating the digest as a
+readable inbox. You scan numbered items first, then ask for detail only when a
+specific item is worth digging into.
 
-The agent will ask you:
-- How often you want your digest (daily or weekly) and what time
-- What language you prefer
-- How you want it delivered (Telegram, email, or in-chat)
+That makes it more useful for:
 
-No API keys needed — all content is fetched centrally.
-Your first digest arrives immediately after setup.
+- Daily signal monitoring
+- Historical lookup by item ID
+- Auditing what the model saw before summarization
+- Moving from "summary only" to "summary plus retrieval"
 
-## Changing Settings
+## Core Capabilities
 
-Your delivery preferences are configurable through conversation. Just tell your agent:
+`followbuildersplus` keeps the original feed-remix-deliver workflow, and adds a
+few practical layers on top:
 
-- "Switch to weekly digests on Monday mornings"
-- "Change language to Chinese"
-- "Make the summaries shorter"
-- "Show me my current settings"
+- Aggregates content from curated AI builders on X/Twitter
+- Aggregates new episodes from selected AI podcasts
+- Generates a structured digest in Chinese, English, or bilingual mode
+- Assigns a stable ID to every digest item
+- Stores daily raw and digest archives locally
+- Lets you request details later using the full item ID
 
-The source list (builders and podcasts) is curated centrally and updates
-automatically — you always get the latest sources without doing anything.
+## What Makes It Different
 
-## Customizing the Summaries
+Compared with the original `follow-builders`, this version adds:
 
-The skill uses plain-English prompt files to control how content is summarized.
-You can customize them two ways:
+1. Stable digest IDs
+   Every digest item gets an ID in the format `FBYYYYMMDDXXX`.
 
-**Through conversation (recommended):**
-Tell your agent what you want — "Make summaries more concise," "Focus on actionable
-insights," "Use a more casual tone." The agent updates the prompts for you.
+2. Dual archives
+   Raw upstream feed data and digest-ready structured items are stored
+   separately, so you can inspect both the source input and the summarized
+   output.
 
-**Direct editing (power users):**
-Edit the files in the `prompts/` folder:
-- `summarize-podcast.md` — how podcast episodes are summarized
-- `summarize-tweets.md` — how X/Twitter posts are summarized
-- `digest-intro.md` — the overall digest format and tone
-- `translate.md` — how English content is translated to Chinese
+3. Detail lookup
+   If your delivery channel supports follow-up chat, you can send a full ID such
+   as `FB20260323007` and fetch the stored detail for that item.
 
-These are plain English instructions, not code. Changes take effect on the next digest.
+4. Structured digest layout
+   Digest output is formatted more consistently, which makes it easier to scan
+   in Feishu and similar chat tools.
+
+## How It Works
+
+1. A central feed is updated with the latest X posts and podcast transcripts.
+2. `prepare-digest.js` fetches the feed and local configuration.
+3. The script writes a raw archive for the full fetched feed.
+4. The script builds digest-ready items, assigns `FB...` IDs, and writes a
+   digest archive.
+5. Your agent uses the archived input plus prompts to generate the final digest.
+6. The digest is delivered to chat.
+7. Later, a full item ID can be used to look up detail from the stored archive.
+
+## Repository Structure
+
+```text
+config/
+  config-schema.json
+  default-sources.json
+examples/
+  sample-digest.md
+prompts/
+  digest-intro.md
+  summarize-podcast.md
+  summarize-tweets.md
+  translate.md
+scripts/
+  deliver.js
+  generate-feed.js
+  lookup-detail.js
+  prepare-digest.js
+README.md
+README.zh-CN.md
+SKILL.md
+feed-podcasts.json
+feed-x.json
+state-feed.json
+```
+
+## Local Data Layout
+
+When installed and used locally, the fork expects its own directory space:
+
+- Config: `~/.followbuildersplus/`
+- Raw archives: `~/.followbuildersplus/archive/raw/`
+- Digest archives: `~/.followbuildersplus/archive/digest/`
+
+This separation is intentional. It keeps the fork independent from the original
+`follow-builders` installation.
+
+## Installation
+
+### OpenClaw
+
+```bash
+git clone https://github.com/lch9901/followbuildersplus.git ~/skills/followbuildersplus
+cd ~/skills/followbuildersplus/scripts && npm install
+```
+
+### Claude Code
+
+```bash
+git clone https://github.com/lch9901/followbuildersplus.git ~/.claude/skills/followbuildersplus
+cd ~/.claude/skills/followbuildersplus/scripts && npm install
+```
+
+## Typical Usage
+
+After installation, your agent can be configured to:
+
+- send a daily digest at a fixed time
+- output structured items with `FB...` IDs
+- store daily archives locally
+- answer follow-up requests for a full item ID
+
+Example:
+
+- Digest item: `FB20260323007`
+- Follow-up request: `FB20260323007`
+- Result: the agent looks up the archived item and returns its detail
 
 ## Default Sources
 
-### Podcasts (5)
+### Podcasts
+
 - [Latent Space](https://www.youtube.com/@LatentSpacePod)
 - [Training Data](https://www.youtube.com/playlist?list=PLOhHNjZItNnMm5tdW61JpnyxeYH5NDDx8)
 - [No Priors](https://www.youtube.com/@NoPriorsPodcast)
 - [Unsupervised Learning](https://www.youtube.com/@RedpointAI)
 - [Data Driven NYC](https://www.youtube.com/@DataDrivenNYC)
 
-### AI Builders on X (25)
-[Andrej Karpathy](https://x.com/karpathy), [Swyx](https://x.com/swyx), [Josh Woodward](https://x.com/joshwoodward), [Kevin Weil](https://x.com/kevinweil), [Peter Yang](https://x.com/petergyang), [Nan Yu](https://x.com/thenanyu), [Madhu Guru](https://x.com/realmadhuguru), [Amanda Askell](https://x.com/AmandaAskell), [Cat Wu](https://x.com/_catwu), [Thariq](https://x.com/trq212), [Google Labs](https://x.com/GoogleLabs), [Amjad Masad](https://x.com/amasad), [Guillermo Rauch](https://x.com/rauchg), [Alex Albert](https://x.com/alexalbert__), [Aaron Levie](https://x.com/levie), [Ryo Lu](https://x.com/ryolu_), [Garry Tan](https://x.com/garrytan), [Matt Turck](https://x.com/mattturck), [Zara Zhang](https://x.com/zarazhangrui), [Nikunj Kothari](https://x.com/nikunj), [Peter Steinberger](https://x.com/steipete), [Dan Shipper](https://x.com/danshipper), [Aditya Agarwal](https://x.com/adityaag), [Sam Altman](https://x.com/sama), [Claude](https://x.com/claudeai)
+### AI Builders on X
 
-## Installation
-
-### OpenClaw
-```bash
-# From ClawhHub (coming soon)
-clawhub install follow-builders
-
-# Or manually
-git clone https://github.com/zarazhangrui/follow-builders.git ~/skills/follow-builders
-cd ~/skills/follow-builders/scripts && npm install
-```
-
-### Claude Code
-```bash
-git clone https://github.com/zarazhangrui/follow-builders.git ~/.claude/skills/follow-builders
-cd ~/.claude/skills/follow-builders/scripts && npm install
-```
+[Andrej Karpathy](https://x.com/karpathy), [Swyx](https://x.com/swyx),
+[Josh Woodward](https://x.com/joshwoodward), [Kevin Weil](https://x.com/kevinweil),
+[Peter Yang](https://x.com/petergyang), [Nan Yu](https://x.com/thenanyu),
+[Madhu Guru](https://x.com/realmadhuguru), [Amanda Askell](https://x.com/AmandaAskell),
+[Cat Wu](https://x.com/_catwu), [Thariq](https://x.com/trq212),
+[Google Labs](https://x.com/GoogleLabs), [Amjad Masad](https://x.com/amasad),
+[Guillermo Rauch](https://x.com/rauchg), [Alex Albert](https://x.com/alexalbert__),
+[Aaron Levie](https://x.com/levie), [Ryo Lu](https://x.com/ryolu_),
+[Garry Tan](https://x.com/garrytan), [Matt Turck](https://x.com/mattturck),
+[Zara Zhang](https://x.com/zarazhangrui), [Nikunj Kothari](https://x.com/nikunj),
+[Peter Steinberger](https://x.com/steipete), [Dan Shipper](https://x.com/danshipper),
+[Aditya Agarwal](https://x.com/adityaag), [Sam Altman](https://x.com/sama),
+[Claude](https://x.com/claudeai)
 
 ## Requirements
 
-- An AI agent (OpenClaw, Claude Code, or similar)
-- Internet connection (to fetch the central feed)
+- An AI agent environment such as OpenClaw or Claude Code
+- Internet access to fetch the central feed
+- Node.js for running the scripts in `scripts/`
 
-That's it. No API keys needed. All content (YouTube transcripts + X/Twitter posts)
-is fetched centrally and updated daily.
-
-## How It Works
-
-1. A central feed is updated daily with the latest content from all sources
-   (YouTube transcripts via Supadata, X/Twitter via official API)
-2. Your agent fetches the feed — one HTTP request, no API keys
-3. Your agent remixes the raw content into a digestible summary using your preferences
-4. The digest is delivered to your messaging app (or shown in-chat)
-
-See [examples/sample-digest.md](examples/sample-digest.md) for what the output looks like.
+No direct X or YouTube API key is required for normal digest consumption.
 
 ## Privacy
 
-- No API keys are sent anywhere — all content is fetched centrally
-- If you use Telegram/email delivery, those keys are stored locally in `~/.follow-builders/.env`
-- The skill only reads public content (public YouTube videos, public X posts)
-- Your configuration, preferences, and reading history stay on your machine
+- The skill works on centrally prepared public content feeds
+- Your local configuration and archives stay on your own machine
+- Delivery credentials, if used, should remain in your local environment only
+
+## Acknowledgement
+
+This project is based on Zara Zhang's original
+[`follow-builders`](https://github.com/zarazhangrui/follow-builders) and extends
+it with local archiving, stable IDs, and follow-up retrieval workflows.
 
 ## License
 
 MIT
-
